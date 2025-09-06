@@ -9,9 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-SECRET_KEY = env("SECRET_KEY", default="super-secret-key")
+SECRET_KEY = env("SECRET_KEY", default="insecure-secret-key")
 DEBUG = env.bool("DEBUG", default=True)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 # Installed apps
 INSTALLED_APPS = [
@@ -24,13 +24,12 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "listings",
-    "drf_yasg",
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -40,32 +39,36 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "alx_travel_app.urls"
 
-# Database config using env vars
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "alx_travel_app.wsgi.application"
+
+# Database (MySQL with env vars)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": env("MYSQL_DB", default="alx_travel_app"),
-        "USER": env("MYSQL_USER", default="root"),
-        "PASSWORD": env("MYSQL_PASSWORD", default="password"),
-        "HOST": env("MYSQL_HOST", default="127.0.0.1"),
-        "PORT": env("MYSQL_PORT", default="3306"),
+        "NAME": env("DB_NAME", default="alx_travel_app"),
+        "USER": env("DB_USER", default="root"),
+        "PASSWORD": env("DB_PASSWORD", default=""),
+        "HOST": env("DB_HOST", default="127.0.0.1"),
+        "PORT": env("DB_PORT", default="3306"),
     }
 }
 
-# REST Framework settings
-REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
-    ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
-    ],
-}
-
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Celery (RabbitMQ as broker)
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://localhost")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="rpc://")
+# Static files
+STATIC_URL = "/static/"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
